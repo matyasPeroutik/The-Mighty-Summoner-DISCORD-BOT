@@ -124,4 +124,4 @@ async def exchange(ctx, curr = 'CZK'):
 
 
 print(TOKEN)
-client.run('Njg0ODAwNjEzNDE4MDA4NjU2.XmKYVw.sw3o0-tk6qcq2qr4d1Xns-Ac7Is')
+client.run(TOKEN)
