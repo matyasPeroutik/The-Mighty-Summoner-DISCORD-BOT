@@ -9,7 +9,7 @@ prefix = '$'
 client = commands.Bot(command_prefix = prefix)
 c = CurrencyRates()
 version = '1.0.1'
-TOKEN = 'Njg0ODAwNjEzNDE4MDA4NjU2.Xl_ldA.MOBHaFqSus8ud9roEnov8RuhbxQ'
+TOKEN = 'Njg0ODAwNjEzNDE4MDA4NjU2.XmKVOQ.yg5T1AYS-w9xeqMRDdTmIbSStuU'
 
 def activation(module):
     if moduleStatus[f'{module}'] == 0:
