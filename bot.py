@@ -1,15 +1,17 @@
 import discord
 import forex_python
+import asyncio
 from forex_python.converter import CurrencyRates
 from discord.ext import commands
-
-
 
 prefix = '$'
 client = commands.Bot(command_prefix = prefix)
 c = CurrencyRates()
 version = '1.0.1'
-TOKEN = 'Njg0ODAwNjEzNDE4MDA4NjU2.XmpK_A.rWa2dymXrVyetC-nymOw6w3Ux2A'
+
+Token = open("token.txt","r").read()
+
+
 
 def activation(module):
     if moduleStatus[f'{module}'] == 0:
@@ -124,4 +126,4 @@ async def exchange(ctx, curr = 'CZK'):
 
 
 print('Njg0ODAwNjEzNDE4MDA4NjU2.XmpK_A.rWa2dymXrVyetC-nymOw6w3Ux2A')
-client.run('Njg0ODAwNjEzNDE4MDA4NjU2.XmpK_A.rWa2dymXrVyetC-nymOw6w3Ux2A', bot=True)
+client.run(str(Token))
