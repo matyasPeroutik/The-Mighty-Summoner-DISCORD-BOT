@@ -9,7 +9,7 @@ prefix = '$'
 client = commands.Bot(command_prefix = prefix)
 c = CurrencyRates()
 version = '1.0.1'
-TOKEN = 'Njg1NTYwMTY4NDIyODM0MjUx.XmKbrg.vwIdesYfESssLpqfvtSXv0rUqGk'
+TOKEN = 'Njg0ODAwNjEzNDE4MDA4NjU2.XmpK_A.rWa2dymXrVyetC-nymOw6w3Ux2A'
 
 def activation(module):
     if moduleStatus[f'{module}'] == 0:
@@ -124,4 +124,4 @@ async def exchange(ctx, curr = 'CZK'):
 
 
 print(TOKEN)
-client.run(TOKEN)
+client.run(TOKEN, bot=True)
