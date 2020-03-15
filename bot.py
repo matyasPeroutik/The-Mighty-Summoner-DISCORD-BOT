@@ -1,16 +1,23 @@
 import discord
+import os
+import requests
 import forex_python
 import asyncio
 from forex_python.converter import CurrencyRates
 from discord.ext import commands
+from dotenv import load_dotenv
 
-prefix = '$'
-client = commands.Bot(command_prefix = prefix)
+
+
+
 c = CurrencyRates()
-version = '1.0.1'
+version = '1.1.0 BETA'
+load_dotenv()
 
-Token = open("token.txt","r").read()
-
+prefix = os.getenv('PREFIX')
+Token = os.getenv('DISCORD_TOKEN')
+LOLapiKey = os.getenv('LOL_API')
+client = commands.Bot(command_prefix = prefix)
 
 
 def activation(module):
@@ -26,9 +33,20 @@ def conversion(ammount, currency):
     converted = c.get_rate(f'{currency}', 'CZK')* float(ammount)
     return converted
 
+def requestSummonerData(region, summonerName, apiKey):
+
+    url = "https://" + region + ".api.riotgames.com/lol/summoner/v4/summoners/by-name/" + summonerName + "?api_key=" + apiKey
+    print(url)
+
+    response = requests.get(url)
+    return response.json()
+
+#def regionRepair(region):
 
 
-moduleStatus = {'exchange' : 0}
+
+moduleStatus = {'exchange' : 0,
+                'summoner' : 0}
 pricesList = {'CZK'+'0' : 100, 
         'CZK'+'1' : 200,
         'CZK'+'2' : 350,
@@ -94,6 +112,7 @@ async def on_ready():
     print(f'Bot is running normally. \nBot version is {version}')
 
 @client.command()
+@commands.has_permissions(administrator=True)
 async def mod(ctx, action):
     activation(action)
     if moduleStatus[str(action)] == 1:
@@ -123,7 +142,17 @@ async def exchange(ctx, curr = 'CZK'):
         await ctx.send('Syntax error: this command is not activated')
 
 
+@client.command()
+async def summoner(ctx, region = None, summonerID = None):
+    if moduleStatus['summoner'] == 1:
+        responseJSON = requestSummonerData(region, summonerID, LOLapiKey)
+        playerLvl = responseJSON["summonerLevel"]
+        playerName = responseJSON["name"]
+        await ctx.send(f""">>> ```{playerName}'s profile
+                        \n  LEVEL       {playerLvl} ```""")
+    else:
+        await ctx.send('Syntax error: this command is not activated')
 
 
-print('Njg0ODAwNjEzNDE4MDA4NjU2.XmpK_A.rWa2dymXrVyetC-nymOw6w3Ux2A')
+
 client.run(Token)
