@@ -143,7 +143,7 @@ async def exchange(ctx, curr = 'CZK'):
 
 
 @client.command()
-async def summoner(ctx, region = None, summonerID = None):
+async def summoner(ctx, region = None, *, summonerID = None):
     if moduleStatus['summoner'] == 1:
         responseJSON = requestSummonerData(region, summonerID, LOLapiKey)
         playerLvl = responseJSON["summonerLevel"]
