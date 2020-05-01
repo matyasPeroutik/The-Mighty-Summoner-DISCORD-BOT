@@ -11,13 +11,14 @@ from dotenv import load_dotenv
 
 
 c = CurrencyRates()
-version = '1.1.0 BETA'
+version = '1.1.3 dev.version 1 - Profile image showdown update'
 load_dotenv()
 
 prefix = os.getenv('PREFIX')
 Token = os.getenv('DISCORD_TOKEN')
 LOLapiKey = os.getenv('LOL_API')
 client = commands.Bot(command_prefix = prefix)
+
 
 
 def activation(module):
@@ -144,15 +145,21 @@ async def exchange(ctx, curr = 'CZK'):
 
 @client.command()
 async def summoner(ctx, region = None, *, summonerID = None):
-    if moduleStatus['summoner'] == 1:
+    if moduleStatus['summoner'] == 0:
         responseJSON = requestSummonerData(region, summonerID, LOLapiKey)
         playerLvl = responseJSON["summonerLevel"]
         playerName = responseJSON["name"]
-        await ctx.send(f""">>> ```{playerName}'s profile
-                        \n  LEVEL       {playerLvl} ```""")
-    else:
-        await ctx.send('Syntax error: this command is not activated')
+        playerIcon = responseJSON["profileIconId"]
+        summRespondMGS = discord.Embed(
+            title = f"{playerName}'s profile",
+            description = f"Level: {playerLvl}",
+            colour = discord.Color.blue()
+        )
+
+        summRespondMGS.set_footer(text='Legius Gaming bot')
+        summRespondMGS.set_thumbnail(url=f'http://ddragon.leagueoflegends.com/cdn/10.9.1/img/profileicon/{playerIcon}.png')
+        await ctx.send(embed = summRespondMGS)
 
 
 
-client.run(Token)
+client.run("MzcyODYzMTY2MjY4NTcxNjU4.XqsEiQ._u_njbmQTKYfhcUgYT_zbU-6rcs")
