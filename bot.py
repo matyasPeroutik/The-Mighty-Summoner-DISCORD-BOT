@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 
 c = CurrencyRates()
-version = '1.1.3 dev.version 1 - Profile image showdown update'
+version = '1.1.3 dev.version 2 - Embed creation'
 load_dotenv()
 
 prefix = os.getenv('PREFIX')
@@ -42,7 +42,13 @@ def requestSummonerData(region, summonerName, apiKey):
     response = requests.get(url)
     return response.json()
 
-#def regionRepair(region):
+def requestSummonerRank(region, summonerID, apiKey):
+
+    url = f"https://{region}.api.riotgames.com/lol/league/v4/entries/by-summoner/{summonerID}?api_key={apiKey}"
+    print(url)
+
+    response1 = requests.get(url)
+    return response1.json()
 
 
 
@@ -105,9 +111,6 @@ rpList = {'CZK'+'0' : 480,
               }
 
 
-
-
-
 @client.event
 async def on_ready():
     print(f'Bot is running normally. \nBot version is {version}')
@@ -147,19 +150,61 @@ async def exchange(ctx, curr = 'CZK'):
 async def summoner(ctx, region = None, *, summonerID = None):
     if moduleStatus['summoner'] == 0:
         responseJSON = requestSummonerData(region, summonerID, LOLapiKey)
-        playerLvl = responseJSON["summonerLevel"]
-        playerName = responseJSON["name"]
-        playerIcon = responseJSON["profileIconId"]
+        player = {}
+        player['info'] = {}
+        player['flex'] = {}
+        player['sd'] = {}
+        player['flexJSON'] = {}
+        player['sdJSON'] = {}
+        output = {}
+        player['info']["Lvl"] = responseJSON["summonerLevel"]
+        player['info']["Name"] = responseJSON["name"]
+        player['info']["Icon"] = responseJSON["profileIconId"]
+        player['info']["ID"] = responseJSON["id"]
+        rankJSON = requestSummonerRank(region, player['info']["ID"], LOLapiKey)
+
+        i=0
+        for i in range(len(rankJSON)):
+            temp = rankJSON[i]
+            if temp["queueType"] == "RANKED_FLEX_SR":
+                player['flexJSON'] = temp
+            elif temp["queueType"] == "RANKED_SOLO_5x5":
+                player['sdJSON'] = temp
+            
+            j=0
+            for j in range(2):
+                if j == 0:
+                    temp = 'flex'
+                    json = 'flexJSON'
+
+                else:
+                    temp = 'sd'
+                    json = 'sdJSON'
+
+                
+                try:
+
+                    player[temp]['division'] = player[json]["tier"]
+                    player[temp]['rank']= player[json]["rank"]
+                    player[temp]['wins'] = player[json]["wins"]
+                    player[temp]['losses'] = player[json]["losses"]
+                    player[temp]['wr'] = round(100*player[temp]['wins']/(player[temp]['wins']+player[temp]['losses']), 2)
+                    player[temp]['LP'] = player[json]["leaguePoints"]
+
+                    output[temp] = f""" -  Rank: **{player[temp]['division']} {player[temp]['rank']}** ({player[temp]['LP']}LP)
+                                        -  Winrate: **{player[temp]['wr']}%** ({player[temp]['wins']} wins, {player[temp]['losses']} losses.)"""
+                except:
+                    output[temp] = '*Unranked*'
+
         summRespondMGS = discord.Embed(
-            title = f"{playerName}'s profile",
-            description = f"Level: {playerLvl}",
+            title = f"{player['info']['Name']}'s profile",
+            description = f"""**Level:** {player['info']['Lvl']}""",
             colour = discord.Color.blue()
         )
-
+        summRespondMGS.add_field(name = 'Ranked Solo/Duo', value = output['sd'], inline = False)
+        summRespondMGS.add_field(name = 'Ranked Flex', value = output['flex'], inline = False)
         summRespondMGS.set_footer(text='Legius Gaming bot')
-        summRespondMGS.set_thumbnail(url=f'http://ddragon.leagueoflegends.com/cdn/10.9.1/img/profileicon/{playerIcon}.png')
+        summRespondMGS.set_thumbnail(url=f'http://ddragon.leagueoflegends.com/cdn/10.9.1/img/profileicon/{player["info"]["Icon"]}.png')
         await ctx.send(embed = summRespondMGS)
 
-
-
-client.run(Token)
+client.run(token)
