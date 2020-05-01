@@ -207,4 +207,4 @@ async def summoner(ctx, region = None, *, summonerID = None):
         summRespondMGS.set_thumbnail(url=f'http://ddragon.leagueoflegends.com/cdn/10.9.1/img/profileicon/{player["info"]["Icon"]}.png')
         await ctx.send(embed = summRespondMGS)
 
-client.run(token)
+client.run(Token)
