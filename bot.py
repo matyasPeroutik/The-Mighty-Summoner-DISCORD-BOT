@@ -162,4 +162,4 @@ async def summoner(ctx, region = None, *, summonerID = None):
 
 
 
-client.run("MzcyODYzMTY2MjY4NTcxNjU4.XqsEiQ._u_njbmQTKYfhcUgYT_zbU-6rcs")
+client.run(prefix)
