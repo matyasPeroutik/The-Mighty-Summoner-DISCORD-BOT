@@ -3,6 +3,7 @@ import os
 import requests
 import forex_python
 import asyncio
+import yaml
 from forex_python.converter import CurrencyRates
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -11,14 +12,21 @@ from dotenv import load_dotenv
 
 
 c = CurrencyRates()
-version = '1.1.3 dev.version 2 - Embed creation'
+version = '1.1.4 dev.version 1 - new help implementation + czech language'
 load_dotenv()
 
 prefix = os.getenv('PREFIX')
 Token = os.getenv('DISCORD_TOKEN')
 LOLapiKey = os.getenv('LOL_API')
 client = commands.Bot(command_prefix = prefix)
+client.remove_command('help')
+language = os.getenv('LANGUAGE')
 
+currencies = {0 : 'CZK', 1 : 'EUR', 2 : 'PLN', 3 : 'HUF'}
+currenciesExchange = {}
+
+with open(r'config.yml', 'r', encoding="utf8") as ymlfile:
+    cfg = yaml.load(ymlfile)
 
 
 def activation(module):
@@ -29,6 +37,14 @@ def activation(module):
     else:
         moduleStatus[f'{module}'] = 0
         return
+
+
+
+
+
+def conversionStartup():
+    for i in range(4):
+        currenciesExchange[i] = c.get_rate(f'{currencies[i]}', 'CZK')
 
 def conversion(ammount, currency):
     converted = c.get_rate(f'{currency}', 'CZK')* float(ammount)
@@ -50,6 +66,13 @@ def requestSummonerRank(region, summonerID, apiKey):
     response1 = requests.get(url)
     return response1.json()
 
+def currencyExchange(curr, prices, rp, rate):
+    for i in range(6):
+        ammount = (str(pricesList[f'{curr}' + f'{i}']))
+        prices[i] = round((float(ammount) * float(rate)), 2)    
+    for j in range(6):
+        rp[j] = str(rpList[f'{curr}' + f'{j}'])
+    return 
 
 
 moduleStatus = {'exchange' : 0,
@@ -114,34 +137,66 @@ rpList = {'CZK'+'0' : 480,
 @client.event
 async def on_ready():
     print(f'Bot is running normally. \nBot version is {version}')
+    conversionStartup()
 
+
+
+@client.command(pass_context=True)
+async def help(ctx):
+
+
+    embed = discord.Embed(
+        colour = discord.Colour.dark_red(),
+        title = cfg[language]['help']['title']
+    )
+    
+    embed.set_thumbnail(url = 'https://scontent.fprg4-1.fna.fbcdn.net/v/t1.15752-9/92830400_1095315430824506_5372434269689872384_n.png?_nc_cat=100&_nc_sid=b96e70&_nc_ohc=n8WRijel04UAX97E3Kk&_nc_ht=scontent.fprg4-1.fna&oh=ad32df8c1581cff5ac0ab6a3d7a8aa50&oe=5ED27359')
+
+    embed.add_field(name='Exchange rates', value= cfg[language]["help"]["exrates"].replace("/comm/", f'*{prefix}exchange <country>* '), inline = False)
+    embed.add_field(name='Summoner info box', value= cfg[language]["help"]["summoner"].replace("/comm/", f'{prefix}summoner <server> <summoner name>'), inline = False)
+    embed.set_author(name = 'Legius Gaming', url = 'https://discord.gg/e6sBVpQ', icon_url = 'https://www.playzone.cz/sites/default/files/styles/113x113_tym/public/cheche.jpg?itok=ijaoQZHL')
+
+    await ctx.author.send(embed = embed)
+    await ctx.send(cfg[language]["help"]["message"])
 @client.command()
 @commands.has_permissions(administrator=True)
 async def mod(ctx, action):
     activation(action)
     if moduleStatus[str(action)] == 1:
-        await ctx.send(f'Module {action} has been activated')
+        await ctx.send(cfg[language]["commands"]["mod"]["activation"].replace("/module/", action))
     else:
-        await ctx.send(f'Module {action} has been deactivated')
+        await ctx.send(cfg[language]["commands"]["mod"]["deactivation"].replace("/module/", action))
+
 
 @client.command()
 async def exchange(ctx, curr = 'CZK'):
     if moduleStatus['exchange'] == 1: 
-        prices = [0, 1, 2, 3, 4, 5]
-        rp = [0, 1, 2, 3, 4, 5]
-        for i in range(6):
-            ammount = (str(pricesList[f'{curr}' + f'{i}']))
-            prices[i] = round(conversion(ammount, curr), 2)    
-        for j in range(6):
-            rp[j] = str(rpList[f'{curr}' + f'{j}'])
+        currEmbed = discord.Embed(
+            title = cfg[language]["commands"]["exchange"]["title"],
+            colour = discord.Colour.gold()
+        )
+        
 
-        await ctx.send(f""">>> ```cs\nToto jsou ceny rp, pokud budete platit v {curr}
-                            \n {rp[0]}RP za {prices[0]}CZK
-                            \n {rp[1]}RP za {prices[1]}CZK
-                            \n {rp[2]}RP za {prices[2]}CZK
-                            \n {rp[3]}RP za {prices[3]}CZK
-                            \n {rp[4]}RP za {prices[4]}CZK
-                            \n {rp[5]}RP za {prices[5]}CZK ```""")
+        for i in range(4):
+            status = False
+            prices = [0, 1, 2, 3, 4, 5]
+            rp = [0, 1, 2, 3, 4, 5]
+            currencyExchange(currencies[i], prices, rp, currenciesExchange[i])
+            currEmbed.add_field(name =cfg[language]["commands"]["exchange"]["output"].replace("/curr/", currencies[i]),
+                value = f"""```  {rp[0]}RP / {prices[0]}CZK ({round(float(rp[0]) / float(prices[0]),2)} RP/CZK)
+  {rp[1]}RP / {prices[1]}CZK ({round(float(rp[1]) / float(prices[1]),2)} RP/CZK)
+  {rp[2]}RP / {prices[2]}CZK ({round(float(rp[2]) / float(prices[2]),2)} RP/CZK)
+  {rp[3]}RP / {prices[3]}CZK ({round(float(rp[3]) / float(prices[3]),2)} RP/CZK)
+  {rp[4]}RP / {prices[4]}CZK ({round(float(rp[4]) / float(prices[4]),2)} RP/CZK)
+  {rp[5]}RP / {prices[5]}CZK ({round(float(rp[5]) / float(prices[5]),2)} RP/CZK)```""",
+                                 inline=status)
+
+        currEmbed.set_thumbnail(url = 'https://pointsprizes-blog.s3-accelerate.amazonaws.com/18.png')
+        currEmbed.set_footer(text = 'Legius Gaming')
+        await ctx.send(embed = currEmbed)
+
+
+
     else:
         await ctx.send('Syntax error: this command is not activated')
 
@@ -162,6 +217,8 @@ async def summoner(ctx, region = None, *, summonerID = None):
         player['info']["Icon"] = responseJSON["profileIconId"]
         player['info']["ID"] = responseJSON["id"]
         rankJSON = requestSummonerRank(region, player['info']["ID"], LOLapiKey)
+
+            
 
         i=0
         for i in range(len(rankJSON)):
@@ -189,13 +246,16 @@ async def summoner(ctx, region = None, *, summonerID = None):
                 player[temp]['wr'] = round(100*player[temp]['wins']/(player[temp]['wins']+player[temp]['losses']), 2)
                 player[temp]['LP'] = player[json]["leaguePoints"]
 
+                if language != "ENGLISH":
+                    player[temp]['division'] = cfg[language]["ranks"][player[temp]['division']]
+
                 output[temp] = f""" -  Rank: **{player[temp]['division']} {player[temp]['rank']}** ({player[temp]['LP']}LP)
                                     -  Winrate: **{player[temp]['wr']}%** ({player[temp]['wins']} wins, {player[temp]['losses']} losses.)"""
             except:
                 output[temp] = '*Unranked*'
 
         summRespondMGS = discord.Embed(
-            title = f"{player['info']['Name']}'s profile",
+            title = cfg[language]["commands"]["summoner"]["title"].replace("/player/", player['info']['Name']),
             description = f"""**Level:** {player['info']['Lvl']}""",
             colour = discord.Color.blue()
         )

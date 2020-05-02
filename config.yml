@@ -1,0 +1,43 @@
+ENGLISH:
+  help:
+    title: Basic server bot commands
+    exrates: /comm/, where country is CZK|PLN|HUF|EUR
+    summoner: /comm/, where server is usually EUN1
+    message: Basic commands were send to you
+
+  commands:
+    mod:
+      activation: Module /module/ has been activated
+      deactivation: Module /module/ has been deactivated
+    exchange:
+      output: These are prices of Riot Point using /curr/ currency.
+      title: Riot point prices
+    summoner:
+      title: /player/'s profile
+
+CZECH:
+  help:
+    title: Základní přikazy pro tohoto bota
+    exrates: /comm/, kde je county CZK|PLN|HUF|EUR
+    summoner: /comm/, kde server nahraďte nejčasteji EUN1
+    message: Byly ti zaslány zakladní příkazy
+  commands:
+    mod:
+      activation: Modul /module/ byl aktivován
+      deactivation: Modul /module/ byl deaktivován
+    exchange:
+      output: Toto jsou ceny rp, pokud budete platit v /curr/.
+      title: Ceny Riot pointů
+    summoner:
+      title: Profil hráče /player/
+      lvl: Úroveň hráče
+  ranks:
+    IRON: Železná
+    BRONZE: Bronzová
+    SILVER: Stříbrná
+    GOLD: Zlatá
+    PLATINUM: Platinová
+    DIAMOND: Diamantová
+    MASTER: Mistrovská
+    GRANDMASTER: Velmistrovská
+    CHALLENGER: Vyzyvatelská
