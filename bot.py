@@ -171,30 +171,28 @@ async def summoner(ctx, region = None, *, summonerID = None):
             elif temp["queueType"] == "RANKED_SOLO_5x5":
                 player['sdJSON'] = temp
             
-            j=0
-            for j in range(2):
-                if j == 0:
-                    temp = 'flex'
-                    json = 'flexJSON'
-
-                else:
-                    temp = 'sd'
-                    json = 'sdJSON'
+        j=0
+        for j in range(2):
+            if j == 0:
+                temp = 'flex'
+                json = 'flexJSON'
+            else:
+                temp = 'sd'
+                json = 'sdJSON'
 
                 
-                try:
+            try:
+                player[temp]['division'] = player[json]["tier"]
+                player[temp]['rank']= player[json]["rank"]
+                player[temp]['wins'] = player[json]["wins"]
+                player[temp]['losses'] = player[json]["losses"]
+                player[temp]['wr'] = round(100*player[temp]['wins']/(player[temp]['wins']+player[temp]['losses']), 2)
+                player[temp]['LP'] = player[json]["leaguePoints"]
 
-                    player[temp]['division'] = player[json]["tier"]
-                    player[temp]['rank']= player[json]["rank"]
-                    player[temp]['wins'] = player[json]["wins"]
-                    player[temp]['losses'] = player[json]["losses"]
-                    player[temp]['wr'] = round(100*player[temp]['wins']/(player[temp]['wins']+player[temp]['losses']), 2)
-                    player[temp]['LP'] = player[json]["leaguePoints"]
-
-                    output[temp] = f""" -  Rank: **{player[temp]['division']} {player[temp]['rank']}** ({player[temp]['LP']}LP)
-                                        -  Winrate: **{player[temp]['wr']}%** ({player[temp]['wins']} wins, {player[temp]['losses']} losses.)"""
-                except:
-                    output[temp] = '*Unranked*'
+                output[temp] = f""" -  Rank: **{player[temp]['division']} {player[temp]['rank']}** ({player[temp]['LP']}LP)
+                                    -  Winrate: **{player[temp]['wr']}%** ({player[temp]['wins']} wins, {player[temp]['losses']} losses.)"""
+            except:
+                output[temp] = '*Unranked*'
 
         summRespondMGS = discord.Embed(
             title = f"{player['info']['Name']}'s profile",
