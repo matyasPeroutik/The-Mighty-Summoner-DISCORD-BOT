@@ -5,25 +5,40 @@ import forex_python
 import asyncio
 import yaml
 from forex_python.converter import CurrencyRates
-from discord.ext import commands
+from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
 
 
 
+
+
+
+
+
+
+
 c = CurrencyRates()
-version = '1.1.4 dev.version 1 - new help implementation + czech language'
+version = '1.1.4 dev.version 2 - Implementing summoner rotation'
 load_dotenv()
 
-prefix = os.getenv('PREFIX')
+prefix =  os.getenv('PREFIX')
 Token = os.getenv('DISCORD_TOKEN')
 LOLapiKey = os.getenv('LOL_API')
 client = commands.Bot(command_prefix = prefix)
 client.remove_command('help')
 language = os.getenv('LANGUAGE')
+translatedRot = ""
 
 currencies = {0 : 'CZK', 1 : 'EUR', 2 : 'PLN', 3 : 'HUF'}
 currenciesExchange = {}
+
+
+
+
+
+
+
 
 with open(r'config.yml', 'r', encoding="utf8") as ymlfile:
     cfg = yaml.load(ymlfile)
@@ -73,6 +88,29 @@ def currencyExchange(curr, prices, rp, rate):
     for j in range(6):
         rp[j] = str(rpList[f'{curr}' + f'{j}'])
     return 
+
+       
+
+
+def requestsRotation(region, apiKey, championDatabase):
+
+    url = f'https://eun1.api.riotgames.com/lol/platform/v3/champion-rotations?api_key={apiKey}'
+    print(url)
+    response1 = requests.get(url)
+    return response1.json()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 moduleStatus = {'exchange' : 0,
@@ -134,10 +172,20 @@ rpList = {'CZK'+'0' : 480,
               }
 
 
+
+# TASKS
+
+@tasks.loop(hours = 1.0)
+async def renew():
+    conversionStartup()
+    print(requestsRotation('EUN1', LOLapiKey, cfg['CHAMPIONS']))
+
+
 @client.event
 async def on_ready():
     print(f'Bot is running normally. \nBot version is {version}')
     conversionStartup()
+
 
 
 
@@ -158,6 +206,8 @@ async def help(ctx):
 
     await ctx.author.send(embed = embed)
     await ctx.send(cfg[language]["help"]["message"])
+
+
 @client.command()
 @commands.has_permissions(administrator=True)
 async def mod(ctx, action):
@@ -264,5 +314,26 @@ async def summoner(ctx, region = None, *, summonerID = None):
         summRespondMGS.set_footer(text='Legius Gaming bot')
         summRespondMGS.set_thumbnail(url=f'http://ddragon.leagueoflegends.com/cdn/10.9.1/img/profileicon/{player["info"]["Icon"]}.png')
         await ctx.send(embed = summRespondMGS)
+
+@client.command()
+async def rotation(ctx):
+    rotation = (requestsRotation('EUN1', LOLapiKey, cfg['CHAMPIONS']))
+    champions = {}
+    championstring = ""
+    for i in range(len(rotation["freeChampionIds"])):
+        champions[i] = cfg["CHAMPIONS"][int(rotation["freeChampionIds"][i])]
+        championstring = championstring + f'\n-{champions[i]}'
+
+    
+    rotationEmbed = discord.Embed(
+        title = cfg[language]["commands"]["rotation"]["title"]        
+    )
+    rotationEmbed.add_field(name = cfg[language]["commands"]["rotation"]["value"],  
+        value = championstring        
+    )
+    
+
+
+    await ctx.send(embed = rotationEmbed)
 
 client.run(Token)
