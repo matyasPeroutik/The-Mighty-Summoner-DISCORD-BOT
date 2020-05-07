@@ -4,6 +4,7 @@ import requests
 import forex_python
 import asyncio
 import yaml
+import random
 from forex_python.converter import CurrencyRates
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
@@ -19,10 +20,10 @@ from dotenv import load_dotenv
 
 
 c = CurrencyRates()
-version = '1.1.4 dev.version 2 - Implementing summoner rotation'
+version = '1.1.4 dev.version 3 - new help implementation + czech language'
 load_dotenv()
 
-prefix =  os.getenv('PREFIX')
+prefix = os.getenv('PREFIX')
 Token = os.getenv('DISCORD_TOKEN')
 LOLapiKey = os.getenv('LOL_API')
 client = commands.Bot(command_prefix = prefix)
@@ -186,7 +187,12 @@ async def on_ready():
     print(f'Bot is running normally. \nBot version is {version}')
     conversionStartup()
 
+@client.command()
+async def pokimane(ctx):
 
+    imageID = random.randrange(10)
+    url = cfg["URLs"]["pokimane"][int(imageID)]
+    await ctx.send(url)
 
 
 @client.command(pass_context=True)
