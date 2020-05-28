@@ -188,11 +188,25 @@ async def on_ready():
     conversionStartup()
 
 @client.command()
-async def pokimane(ctx):
-
-    imageID = random.randrange(10)
-    url = cfg["URLs"]["pokimane"][int(imageID)]
-    await ctx.send(url)
+async def pokimane(ctx, *, member: discord.Member=None):
+    imageID = random.randrange(15)
+    if imageID < 5:
+        try:
+            if member.id == 507638492252209152:          
+                url = cfg["URLs"]["pokimane"]["darkman"]
+            else:
+                url = cfg["URLs"]["pokimane"][imageID]
+        except:
+            if ctx.author.id == 507638492252209152:
+                url = cfg["URLs"]["pokimane"]["darkman"]
+            else:
+                url = cfg["URLs"]["pokimane"][imageID]
+    else :
+        url = cfg["URLs"]["pokimane"][imageID]
+     
+    embed = discord.Embed()
+    embed.set_image(url = url)
+    await ctx.send(embed = embed)
 
 
 @client.command(pass_context=True)
