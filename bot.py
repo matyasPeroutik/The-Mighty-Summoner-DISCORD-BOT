@@ -114,7 +114,7 @@ def requestsRotation(region, apiKey, championDatabase):
 
 
 
-moduleStatus = {'exchange' : 0,
+moduleStatus = {'exchange' : 1,
                 'summoner' : 0}
 pricesList = {'CZK'+'0' : 100, 
         'CZK'+'1' : 200,
